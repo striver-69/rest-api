@@ -5,9 +5,22 @@ const mongoose=require('mongoose')
 const Product=require('../models/products')
 
 router.get('/',(req,res,next)=>{
-    Product.find().then((docs)=>{
-        console.log(docs)
-        res.status(200).json(docs)
+    Product.find({}).then((docs)=>{
+        const response={
+            count:docs.length,
+            products:docs.map((doc)=>{
+                return{
+                    name:doc.name,
+                    price:doc.price,
+                    _id:doc._id,
+                    request:{
+                        type:"GET",
+                        url:"http://localhost:3000/products/"+doc._id
+                    }
+                }
+            })
+        }
+        res.status(200).json(response)
     }).catch((e)=>{
         console.log(e)
         res.status(500).json({error:e})
@@ -25,8 +38,16 @@ router.post('/',(req,res,next)=>{
     product.save().then((result)=>{
         console.log(result)
         res.status(201).json({
-            message:'handling POST requests to /products',
-            createdProduct:result
+            message:'Craeted a product successfully',
+            createdProduct:{
+                name:result.name,
+                price:result.price,
+                _id:result._id,
+                request:{
+                    type:"GET",
+                    url:"http://localhost:3000/products/"+result._id
+                }
+            }
         })
     }).catch((e)=>{
         console.log(e)
@@ -39,7 +60,13 @@ router.get('/:productId',(req,res,next)=>{
     Product.findById(id).then((result)=>{
         console.log(result)
         if(result){
-            return res.status(200).json(result)
+            return res.status(200).json({
+                product:result,
+                request:{
+                    type:'GET',
+                    url:'http://localhost:3000/products/'
+                }
+            })
         }
         res.status(404).json({message:'No valid entry found for provided id'})
         
@@ -56,8 +83,13 @@ router.patch('/:productId',(req,res,next)=>{
         updateOps[ops.propName]=ops.Value
     }
     Product.update({_id:id},{$set:updateOps}).then((doc)=>{
-        console.log(doc)
-        res.status(200).json(doc)
+        res.status(200).json({
+            message:'Product Updated',
+            request:{
+                type:'GET',
+                url:'http://localhost:3000/products/'+id
+            }
+        })
     }).catch((e)=>{
         console.log(e)
         res.status(500).json({
@@ -69,7 +101,14 @@ router.patch('/:productId',(req,res,next)=>{
 router.delete('/:productId',(req,res,next)=>{
     const id=req.params.productId
     Product.remove({_id:id}).then((result)=>{
-        res.status(200).json(result)
+        res.status(200).json({
+            message:"Product deleted",
+            request:{
+                type:"POST",
+                url:'http://localhost:3000/products/',
+                body:{name:'String',Price:'Number'}
+            }
+        })
     }).catch((e)=>{
         console.log(e)
         res.status(500).json({
