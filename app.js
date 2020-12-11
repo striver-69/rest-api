@@ -6,6 +6,8 @@ const mongoose=require('mongoose')
 
 const productRoutes=require('./api/routes/product')
 const orderRoutes=require('./api/routes/orders')
+const userRoutes=require('./api/routes/user')
+
 mongoose.connect('mongodb://127.0.0.1:27017/products',{useUnifiedTopology:true,useNewUrlParser:true})
 
 
@@ -33,6 +35,7 @@ app.use((req,res,next)=>{
 //routes which should handle requests
 app.use('/products',productRoutes) 
 app.use('/orders',orderRoutes)
+app.use('/users',userRoutes)
 
 //error if if above routes donot get requests
 app.use((req,res,next)=>{
