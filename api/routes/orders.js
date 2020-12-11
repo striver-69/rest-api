@@ -1,11 +1,12 @@
 const express=require('express')
 const router=express.Router()
 const mongoose=require('mongoose')
+const checkAuth=require('../middleware/check-auth')
 
 const Order=require('../models/order')
 const Product=require('../models/products')
 
-router.get('/',(req,res,next)=>{
+router.get('/',checkAuth,(req,res,next)=>{
     Order.find({}).select('product quantity _id')
     .populate('product','name ').then((docs)=>{
         res.status(200).json({
@@ -29,7 +30,7 @@ router.get('/',(req,res,next)=>{
     })
 })
 
-router.post('/',async(req,res,next)=>{
+router.post('/',checkAuth,async(req,res,next)=>{
     const prod=await Product.findById(req.body.productId)
     if(!prod){
         return res.status(404).json({message:'product not found'})
@@ -59,7 +60,7 @@ router.post('/',async(req,res,next)=>{
 
 })
 
-router.get('/:orderId',(req,res,next)=>{
+router.get('/:orderId',checkAuth,(req,res,next)=>{
     Order.findById(req.params.orderId)
     .populate('product').then((order)=>{
         if(!order){
@@ -79,7 +80,7 @@ router.get('/:orderId',(req,res,next)=>{
     })
 })
 
-router.delete('/:orderId',async(req,res,next)=>{
+router.delete('/:orderId',checkAuth,async(req,res,next)=>{
     try{
         const order=await Order.findByIdAndDelete(req.params.orderId)
     if(order){
