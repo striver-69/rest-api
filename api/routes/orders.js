@@ -6,7 +6,8 @@ const Order=require('../models/order')
 const Product=require('../models/products')
 
 router.get('/',(req,res,next)=>{
-    Order.find({}).select('product quantity _id').then((docs)=>{
+    Order.find({}).select('product quantity _id')
+    .populate('product','name ').then((docs)=>{
         res.status(200).json({
             count:docs.length,
             orders:docs.map((doc)=>{
@@ -59,7 +60,8 @@ router.post('/',async(req,res,next)=>{
 })
 
 router.get('/:orderId',(req,res,next)=>{
-    Order.findById(req.params.orderId).then((order)=>{
+    Order.findById(req.params.orderId)
+    .populate('product').then((order)=>{
         if(!order){
             return res.status(404).json({
                 message:'order not found'
